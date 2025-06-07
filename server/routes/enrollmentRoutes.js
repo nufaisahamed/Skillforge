@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Course = require('../models/Course'); // Needed to verify course existence
 const User = require('../models/UserModels');     // Needed to manage user enrollments
-const { protect, authorize } = require('../Middleware/authMiddleware');
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js');
 
 // @desc    Enroll a user in a course
 // @route   POST /api/enrollments/:userId/:courseId

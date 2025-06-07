@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js');
 
 // @desc    Get all job listings with search, filter, and pagination
 // @route   GET /api/jobs

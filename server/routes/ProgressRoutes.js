@@ -5,7 +5,7 @@ const UserProgress = require('../models/UserProgress');
 const Course = require('../models/Course'); // Needed to get course info for lesson
 const Lesson = require('../models/Lesson'); // Needed to check if lesson exists
 const User = require('../models/UserModels');     // Import User model
-const { protect, authorize } = require('../Middleware/authMiddleware');
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js');
 
 // @desc    Mark a lesson as complete for the logged-in user
 // @route   POST /api/progress/complete-lesson/:lessonId

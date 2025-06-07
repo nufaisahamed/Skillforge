@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Course = require('../models/Course');
-const { protect, authorize } = require('../Middleware/authMiddleware'); // Ensure correct path
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js'); // Ensure correct path
 const Lesson = require('../models/Lesson');
 const UserProgress = require('../models/UserProgress');
 const User = require('../models/UserModels')

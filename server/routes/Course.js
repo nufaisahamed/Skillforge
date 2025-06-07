@@ -8,7 +8,7 @@ const {
   updateCourse,
   deleteCourse,
 } = require('../controllers/courseController');
-const { protect, authorize } = require('../Middleware/authMiddleware'); // NEW: Import middleware
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js'); // NEW: Import middleware
 
 // Routes that handle all courses
 // GET: Publicly accessible

@@ -6,7 +6,7 @@ const Course = require('../models/Course');
 // Corrected User model import path (assuming file is User.js)
 const User = require('../models/UserModels');
 // Corrected authMiddleware import path (assuming folder is 'middleware' lowercase)
-const { protect, authorize } = require('../Middleware/authMiddleware');
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js');
 
 // @desc    Get all lessons for a specific course
 // @route   GET /api/courses/:courseId/lessons

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Storybook = require('../models/Storybook');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js');
 // Removed multer and fs imports as they are no longer needed for URL-based management
 
 // @desc    Get all storybooks
