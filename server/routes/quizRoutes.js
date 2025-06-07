@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 // Ensure correct paths and export names for middleware and controllers
-const { protect, authorize } = require('../middleware/authMiddleware.js'); // Explicit .js extension
+const { protect, authorize } = require('../../server/Middleware/authMiddleware.js'); // Explicit .js extension
 const {
   createQuiz,
   getQuizById,
