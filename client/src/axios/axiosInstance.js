@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://skillforge-ftjf.onrender.com', // Your backend API base URL
+  baseURL: 'https://skillforge-ftjf.onrender.com/api', // Your backend API base URL
   headers: {
     'Content-Type': 'application/json',
   },
