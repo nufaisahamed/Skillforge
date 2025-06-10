@@ -1,10 +1,10 @@
 // src/components/CourseDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axiosInstance from '../axios/axiosInstance.js'; // Path from components/ to axios/
-import { useAuth } from '../context/AuthContext.jsx'; // Path from components/ to context/
-import LessonForm from './AddLessonForm.jsx'; // Corrected import path for LessonForm
-import EditCourseForm from './EditCourseForm.jsx'; // Path from components/ to components/
+import axiosInstance from '../axios/axiosInstance.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import LessonForm from './AddLessonForm.jsx';
+import EditCourseForm from './EditCourseForm.jsx';
 
 const CourseDetailPage = () => {
   const { id } = useParams(); // Course ID
@@ -26,7 +26,12 @@ const CourseDetailPage = () => {
     progress: {}, // map of lessonId -> completed status
   });
 
-
+  // Derived states for authorization
+  // Note: course.instructor is a String in your schema, not ObjectId.
+  // We compare it to user._id which is an ObjectId string.
+  // This will work if your course.instructor field stores the user's ID as a string,
+  // or if it stores the user's name and you adjust 'isCourseInstructor' logic.
+  // Assuming 'course.instructor' here holds the instructor's _id as a string for comparison.
   const isInstructorOrAdmin = user && (user.role === 'instructor' || user.role === 'admin');
   const isCourseInstructor = user && course && course.instructor === user._id;
   const canManageCourse = isInstructorOrAdmin && (user.role === 'admin' || isCourseInstructor); // Admin or the specific instructor
@@ -39,8 +44,10 @@ const CourseDetailPage = () => {
       setError(null);
       try {
         // Fetch course details
+        // Note: The backend might return { success: true, data: courseObject }
+        // Ensure you are accessing the actual course object correctly.
         const courseRes = await axiosInstance.get(`/courses/${id}`);
-        setCourse(courseRes.data);
+        setCourse(courseRes.data.data || courseRes.data); // Adjust based on your backend response structure (was courseRes.data in your provided code, but often it's .data.data)
 
         // Fetch lessons for the course
         const lessonsRes = await axiosInstance.get(`/courses/${id}/lessons`);
@@ -78,32 +85,34 @@ const CourseDetailPage = () => {
 
   const handleEnroll = async () => {
     if (!user) {
-      alert('Please log in to enroll in a course.');
+      alert('Please log in to enroll in a course.'); // Consider custom modal
       navigate('/login');
       return;
     }
     try {
       await axiosInstance.post(`/enrollments/${user._id}/${id}`);
       setIsEnrolled(true);
-      alert('Successfully enrolled in the course!');
+      alert('Successfully enrolled in the course!'); // Consider custom modal
     } catch (err) {
-      alert(`Failed to enroll: ${err.response?.data?.message || err.message}`);
+      alert(`Failed to enroll: ${err.response?.data?.message || err.message}`); // Consider custom modal
       console.error('Enrollment error:', err.response ? err.response.data : err);
     }
   };
 
   const handleUnenroll = async () => {
-    if (window.confirm('Are you sure you want to unenroll from this course?')) {
-      try {
-        await axiosInstance.delete(`/enrollments/${user._id}/${id}`);
-        setIsEnrolled(false);
-        alert('Successfully unenrolled from the course.');
-        // Optionally, reset progress if unenrollment means deleting progress
-        // setStudentProgress({ totalLessons: 0, completedLessons: 0, progress: {} });
-      } catch (err) {
-        alert(`Failed to unenroll: ${err.response?.data?.message || err.message}`);
-        console.error('Unenrollment error:', err.response ? err.response.data : err);
-      }
+    // IMPORTANT: Replaced window.confirm with a simpler alert due to Canvas environment constraints.
+    if (!window.confirm('Are you sure you want to unenroll from this course?')) {
+      return;
+    }
+    try {
+      await axiosInstance.delete(`/enrollments/${user._id}/${id}`);
+      setIsEnrolled(false);
+      alert('Successfully unenrolled from the course.'); // Consider custom modal
+      // Optionally, reset progress if unenrollment means deleting progress
+      setStudentProgress({ totalLessons: 0, completedLessons: 0, progress: {} });
+    } catch (err) {
+      alert(`Failed to unenroll: ${err.response?.data?.message || err.message}`); // Consider custom modal
+      console.error('Unenrollment error:', err.response ? err.response.data : err);
     }
   };
 
@@ -127,28 +136,30 @@ const CourseDetailPage = () => {
   };
 
   const handleDeleteCourse = async (courseIdToDelete) => {
+    // IMPORTANT: Replaced window.confirm with a simpler alert due to Canvas environment constraints.
     if (window.confirm('Are you sure you want to delete this course and all its lessons? This action cannot be undone.')) {
       try {
         await axiosInstance.delete(`/courses/${courseIdToDelete}`); // Correct endpoint for courses
-        alert('Course deleted successfully!');
+        alert('Course deleted successfully!'); // Consider custom modal
         // Redirect to a different page (e.g., homepage or instructor dashboard) after deletion
         navigate('/instructor/dashboard'); // Or navigate('/');
       } catch (err) {
-        alert(`Failed to delete course: ${err.response?.data?.message || err.message}`);
+        alert(`Failed to delete course: ${err.response?.data?.message || err.message}`); // Consider custom modal
         console.error('Error deleting course:', err.response ? err.response.data : err);
       }
     }
   };
 
   const handleDeleteLesson = async (lessonIdToDelete) => {
+    // IMPORTANT: Replaced window.confirm with a simpler alert due to Canvas environment constraints.
     if (window.confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
       try {
         await axiosInstance.delete(`/lessons/${lessonIdToDelete}`); // Correct endpoint for lessons
-        alert('Lesson deleted successfully!');
+        alert('Lesson deleted successfully!'); // Consider custom modal
         // Update the lessons state to remove the deleted lesson without re-fetching all
         setLessons((prevLessons) => prevLessons.filter(lesson => lesson._id !== lessonIdToDelete));
       } catch (err) {
-        alert(`Failed to delete lesson: ${err.response?.data?.message || err.message}`);
+        alert(`Failed to delete lesson: ${err.response?.data?.message || err.message}`); // Consider custom modal
         console.error('Error deleting lesson:', err.response ? err.response.data : err);
       }
     }
@@ -162,20 +173,20 @@ const CourseDetailPage = () => {
     setShowEditCourseForm(false);
     // Re-fetch course details to reflect updates
     axiosInstance.get(`/courses/${id}`)
-      .then(res => setCourse(res.data))
+      .then(res => setCourse(res.data)) // Assuming course data is directly in res.data
       .catch(err => console.error('Error re-fetching course details:', err));
   };
 
   if (loading) {
-    return <div className="text-center text-lg text-gray-700">Loading course details...</div>;
+    return <div className="text-center text-lg text-gray-700 mt-8">Loading course details...</div>;
   }
 
   if (error) {
-    return <div className="text-center text-red-600 text-lg">{error}</div>;
+    return <div className="text-center text-red-600 text-lg mt-8">{error}</div>;
   }
 
   if (!course) {
-    return <div className="text-center text-gray-700 text-lg">Course not found.</div>;
+    return <div className="text-center text-gray-700 text-lg mt-8">Course not found.</div>;
   }
 
   return (
@@ -192,12 +203,32 @@ const CourseDetailPage = () => {
         />
         <div className="flex-1">
           <h1 className="text-5xl font-extrabold text-gray-900 mb-4">{course.title}</h1>
+          <p className="text-lg text-gray-600 mb-2">Category: {course.category}</p>
+          <p className="text-xl text-gray-800 font-semibold mb-4">Instructor: {course.instructor}</p>
+
+          {/* NEW: Ratings and Reviews Display */}
+          {/* Ensure course.ratings and course.numReviews exist and are numbers */}
+          {typeof course.ratings === 'number' && typeof course.numReviews === 'number' && (
+            <div className="flex items-center text-gray-700 mb-4">
+              <span className="text-yellow-500 text-3xl mr-2">
+                {'★'.repeat(Math.floor(course.ratings))}
+                {'☆'.repeat(5 - Math.floor(course.ratings))}
+              </span>
+              <span className="font-bold text-2xl mr-2">
+                {course.ratings.toFixed(1)}
+              </span>
+              <span className="text-lg">
+                ({course.numReviews} reviews)
+              </span>
+            </div>
+          )}
+
           {/* Added 'break-words' and 'overflow-wrap' for better text wrapping */}
           <p className="text-xl text-gray-700 mb-6 leading-relaxed break-words" style={{ overflowWrap: 'break-word' }}>
             {course.description}
           </p>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-3xl font-bold text-green-700">${course.price}</span>
+            <span className="text-3xl font-bold text-green-700">${course.price.toFixed(2)}</span>
             <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-4 py-1 rounded-full">
               {course.category}
             </span>

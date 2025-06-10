@@ -13,7 +13,7 @@ const CourseSchema = mongoose.Schema(
       required: [true, 'Please add a description for the course'],
     },
     instructor: {
-      type: String,
+      type: String, // Assuming instructor name is stored as a String
       required: [true, 'Please add an instructor name'],
       trim: true,
     },
@@ -31,10 +31,18 @@ const CourseSchema = mongoose.Schema(
       required: [true, 'Please add a category for the course'],
       enum: ['Web Development', 'Web Design', 'Backend Development', 'Programming', 'Design', 'Computer Science', 'Data Science', 'Mobile Development'], // Example categories
     },
-    // You can add more fields like:
-    // lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
-    // ratings: { type: Number, default: 0 },
-    // numReviews: { type: Number, default: 0 },
+    ratings: { // NEW FIELD: Average rating for the course
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+      set: val => Math.round(val * 10) / 10 // Store to 1 decimal place
+    },
+    numReviews: { // NEW FIELD: Number of reviews received
+      type: Number,
+      default: 0,
+      min: 0
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
