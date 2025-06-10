@@ -1,65 +1,67 @@
-// models/Lesson.js
+// course-platform-backend/models/Quiz.js
 const mongoose = require('mongoose');
 
-const LessonSchema = new mongoose.Schema({
-  course: {
+const QuizQuestionSchema = new mongoose.Schema({
+  questionText: {
+    type: String,
+    required: [true, 'Question text is required'],
+    trim: true,
+  },
+  options: {
+    type: [String], // Array of strings for options
+    required: [true, 'Options are required'],
+    validate: {
+      validator: function(v) {
+        return v.length >= 2; // Ensure at least two options
+      },
+      message: props => `A question must have at least 2 options, but has ${props.value.length}`
+    }
+  },
+  correctAnswer: {
+    type: String,
+    required: [true, 'Correct answer is required'],
+    validate: {
+      validator: function(value) {
+        // The correct answer must be one of the provided options
+        return this.options.includes(value);
+      },
+      message: props => `Correct answer "${props.value}" is not one of the provided options.`
+    }
+  }
+});
+
+const QuizSchema = new mongoose.Schema({
+  // Changed field name from 'lessonId' to 'lesson' to match your database
+  lesson: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Course',
-    required: true,
+    ref: 'Lesson', // The name of the model to which it refers
+    required: [true, 'Quiz must be associated with a lesson'],
+    unique: true // Ensures only one quiz per lesson
   },
   title: {
     type: String,
-    required: [true, 'Please add a lesson title'],
+    required: [true, 'Quiz title is required'],
     trim: true,
-    maxlength: [100, 'Title can not be more than 100 characters'],
+    maxlength: [100, 'Quiz title cannot be more than 100 characters'],
   },
   description: {
     type: String,
-    required: [true, 'Please add a lesson description'],
-    maxlength: [500, 'Description can not be more than 500 characters'],
-  },
-  videoUrl: {
-    type: String,
-    match: [/^$|^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/, 'Please use a valid URL for video'],
     trim: true,
   },
-  imageUrl: {
-    type: String,
-    match: [/^$|^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/, 'Please use a valid URL for image'],
-    trim: true,
-  },
-  content: {
-    type: String,
-    maxlength: [5000, 'Lesson content can not be more than 5000 characters'],
-    trim: true,
-  },
-  externalUrl: {
-    type: String,
-    match: [/^$|^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/, 'Please use a valid URL for external page'],
-    trim: true,
-  },
-  order: {
-    type: Number,
-    required: [true, 'Please add a lesson order'],
-    min: 0,
-    default: 0,
-  },
-  instructor: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  // ✅ Updated to allow multiple quizzes
-  quiz: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Quiz',
+  questions: {
+    type: [QuizQuestionSchema], // Array of embedded QuizQuestionSchema
+    required: [true, 'Quiz must have questions'],
+    validate: {
+      validator: function(v) {
+        return v.length > 0; // Ensure at least one question
+      },
+      message: 'A quiz must have at least one question.'
     }
-  ],
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model('Lesson', LessonSchema);
+module.exports = mongoose.model('Quiz', QuizSchema);
