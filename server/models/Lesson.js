@@ -1,4 +1,4 @@
-// models/Lesson.js
+// course-platform-backend/models/Lesson.js
 const mongoose = require('mongoose');
 
 const LessonSchema = new mongoose.Schema({
@@ -49,13 +49,12 @@ const LessonSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  // ✅ Updated to allow multiple quizzes
-  quiz: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Quiz',
-    }
-  ],
+  // NEW: Reference to a Quiz
+  quiz: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Quiz',
+    default: null, // A lesson doesn't necessarily have a quiz
+  },
   createdAt: {
     type: Date,
     default: Date.now,
